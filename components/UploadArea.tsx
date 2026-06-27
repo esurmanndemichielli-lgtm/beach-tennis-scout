@@ -3,6 +3,8 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 export default function UploadArea() {
   const [url, setUrl] = useState("");
   const [mode, setMode] = useState("youtube");
@@ -32,7 +34,7 @@ export default function UploadArea() {
       if (mode === "upload" && file) {
         const formData = new FormData();
         formData.append("file", file);
-        const res = await fetch("http://localhost:8000/api/videos/upload", {
+        const res = await fetch(API_URL + "/api/videos/upload", {
           method: "POST",
           body: formData,
         });
