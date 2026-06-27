@@ -11,27 +11,37 @@ const STEPS = [
   { key: "Geração de estatísticas", detail: "Calculando estatísticas finais" },
 ];
 
+type JobStatus = {
+  job_id: string;
+  status: string;
+  progress: number;
+  current_step: string;
+  steps_completed: string[];
+  error?: string;
+};
+
 function ProcessingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams.get("job_id");
-  const [status, setStatus] = useState(null);
+  const [status, setStatus] = useState<JobStatus | null>(null);
   const [error, setError] = useState("");
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
     if (!jobId) { router.push("/dashboard"); return; }
     const interval = setInterval(async () => {
       try {
-        const res = await fetch("http://localhost:8000/api/videos/status/" + jobId);
+        const res = await fetch(API_URL + "/api/videos/status/" + jobId);
         if (!res.ok) throw new Error("Job nao encontrado");
-        const data = await res.json();
+        const data: JobStatus = await res.json();
         setStatus(data);
         if (data.status === "completed") { clearInterval(interval); setTimeout(() => router.push("/matches"), 2000); }
         if (data.status === "error") { clearInterval(interval); setError(data.error || "Erro no processamento."); }
       } catch { setError("Erro ao conectar com o servidor."); clearInterval(interval); }
     }, 1000);
     return () => clearInterval(interval);
-  }, [jobId, router]);
+  }, [jobId, router, API_URL]);
 
   const progress = status ? Math.round(status.progress * 100) : 0;
   const completed = status?.steps_completed || [];
