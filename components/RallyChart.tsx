@@ -18,29 +18,29 @@ const RALLY_DATA = [
 ];
 
 const WINNERS_DATA = [
-  { name: "João & Pedro", winners: 18, erros: 9 },
-  { name: "Lucas & Rafael", winners: 11, erros: 16 },
+  { name: "Joao e Pedro", winners: 18, erros: 9 },
+  { name: "Lucas e Rafael", winners: 11, erros: 16 },
 ];
 
 export default function RallyChart() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: 24 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Duração dos rallies por game</h3>
-        <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 20 }}>Tempo médio em segundos</p>
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Duracao dos rallies por game</h3>
+        <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 20 }}>Tempo medio em segundos</p>
         <ResponsiveContainer width="100%" height={220}>
           <LineChart data={RALLY_DATA}>
             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
             <XAxis dataKey="set" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} unit="s" />
-            <Tooltip formatter={(v: number) => [v + "s", "Duração"]} />
-            <Line type="monotone" dataKey="joao" stroke="#0ea5e9" strokeWidth={2} dot={false} name="Duração" />
+            <Tooltip />
+            <Line type="monotone" dataKey="joao" stroke="#0ea5e9" strokeWidth={2} dot={false} name="Duracao" />
           </LineChart>
         </ResponsiveContainer>
       </div>
 
       <div style={{ background: "var(--card)", border: "1px solid var(--border)", borderRadius: 12, padding: 24 }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Winners vs Erros não forçados</h3>
+        <h3 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Winners vs Erros nao forcados</h3>
         <p style={{ fontSize: 13, color: "var(--muted)", marginBottom: 20 }}>Comparativo entre as duplas</p>
         <ResponsiveContainer width="100%" height={200}>
           <BarChart data={WINNERS_DATA} layout="vertical">
