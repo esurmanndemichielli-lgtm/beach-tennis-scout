@@ -1,7 +1,8 @@
 ﻿"use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect } from "react";
 
 const STEPS = [
   { key: "Extração de frames", detail: "Extraindo frames do vídeo" },
@@ -11,41 +12,32 @@ const STEPS = [
   { key: "Geração de estatísticas", detail: "Calculando estatísticas finais" },
 ];
 
-type JobStatus = {
-  job_id: string;
-  status: string;
-  progress: number;
-  current_step: string;
-  steps_completed: string[];
-  error?: string;
-};
-
 function ProcessingContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const jobId = searchParams.get("job_id");
-  const [status, setStatus] = useState<JobStatus | null>(null);
+  const [status, setStatus] = useState(null);
   const [error, setError] = useState("");
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
   useEffect(() => {
     if (!jobId) { router.push("/dashboard"); return; }
-    const interval = setInterval(async () => {
+    const iv = setInterval(async () => {
       try {
-        const res = await fetch(API_URL + "/api/videos/status/" + jobId);
-        if (!res.ok) throw new Error("Job nao encontrado");
-        const data: JobStatus = await res.json();
+        const res = await fetch(API + "/api/videos/status/" + jobId);
+        if (!res.ok) throw new Error("err");
+        const data = await res.json();
         setStatus(data);
-        if (data.status === "completed") { clearInterval(interval); setTimeout(() => router.push("/matches"), 2000); }
-        if (data.status === "error") { clearInterval(interval); setError(data.error || "Erro no processamento."); }
-      } catch { setError("Erro ao conectar com o servidor."); clearInterval(interval); }
+        if (data.status === "completed") { clearInterval(iv); setTimeout(() => router.push("/matches"), 2000); }
+        if (data.status === "error") { clearInterval(iv); setError(data.error || "Erro."); }
+      } catch { setError("Erro ao conectar."); clearInterval(iv); }
     }, 1000);
-    return () => clearInterval(interval);
-  }, [jobId, router, API_URL]);
+    return () => clearInterval(iv);
+  }, [jobId, router, API]);
 
-  const progress = status ? Math.round(status.progress * 100) : 0;
-  const completed = status?.steps_completed || [];
-  const done = status?.status === "completed";
+  const pct = status ? Math.round((status as any).progress * 100) : 0;
+  const completed = (status as any)?.steps_completed || [];
+  const done = (status as any)?.status === "completed";
 
   return (
     <div style={{ minHeight: "80vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -55,10 +47,10 @@ function ProcessingContent() {
             {done ? "✅" : "🤖"}
           </div>
           <h1 style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>
-            {done ? "Análise concluída!" : error ? "Erro no processamento" : "Analisando partida"}
+            {done ? "Análise concluída!" : error ? "Erro" : "Analisando partida"}
           </h1>
           <p style={{ fontSize: 14, color: "var(--muted)" }}>
-            {done ? "Redirecionando..." : error ? error : "A IA está processando o vídeo..."}
+            {done ? "Redirecionando..." : error || "A IA está processando o vídeo..."}
           </p>
         </div>
         {!error && (
@@ -66,19 +58,19 @@ function ProcessingContent() {
             <div style={{ marginBottom: 28 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
                 <span style={{ fontSize: 13, color: "var(--muted)" }}>Progresso geral</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)" }}>{progress}%</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: "var(--brand)" }}>{pct}%</span>
               </div>
               <div style={{ height: 8, background: "#e2e8f0", borderRadius: 99, overflow: "hidden" }}>
-                <div style={{ width: progress + "%", height: "100%", background: done ? "#16a34a" : "var(--brand)", borderRadius: 99, transition: "width 0.5s ease" }} />
+                <div style={{ width: pct + "%", height: "100%", background: done ? "#16a34a" : "var(--brand)", borderRadius: 99, transition: "width 0.5s ease" }} />
               </div>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
               {STEPS.map((step) => {
                 const isDone = completed.includes(step.key);
-                const isActive = !isDone && status?.current_step === step.key;
+                const isActive = !isDone && (status as any)?.current_step === step.key;
                 return (
-                  <div key={step.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10, border: "1px solid " + (isDone ? "#bbf7d0" : isActive ? "#bfdbfe" : "var(--border)"), background: isDone ? "#f0fdf4" : isActive ? "#eff6ff" : "#f8fafc", opacity: !isDone && !isActive ? 0.5 : 1, transition: "all 0.3s" }}>
-                    <span style={{ fontSize: 20, flexShrink: 0 }}>{isDone ? "✅" : isActive ? "⏳" : "⭕"}</span>
+                  <div key={step.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 14px", borderRadius: 10, border: "1px solid " + (isDone ? "#bbf7d0" : isActive ? "#bfdbfe" : "var(--border)"), background: isDone ? "#f0fdf4" : isActive ? "#eff6ff" : "#f8fafc", opacity: !isDone && !isActive ? 0.5 : 1 }}>
+                    <span style={{ fontSize: 20 }}>{isDone ? "✅" : isActive ? "⏳" : "⭕"}</span>
                     <div style={{ flex: 1 }}>
                       <p style={{ fontSize: 13, fontWeight: 600, margin: "0 0 2px", color: isDone ? "#15803d" : isActive ? "#1d4ed8" : "var(--muted)" }}>{step.key}</p>
                       <p style={{ fontSize: 12, margin: 0, color: isDone ? "#16a34a" : isActive ? "#3b82f6" : "var(--muted)" }}>{step.detail}</p>
@@ -90,9 +82,6 @@ function ProcessingContent() {
                 );
               })}
             </div>
-            <p style={{ textAlign: "center", fontSize: 12, color: "var(--muted)", marginTop: 20 }}>
-              {done ? "✓ Tudo pronto!" : "⏱ Processando com YOLOv8..."}
-            </p>
           </>
         )}
       </div>
