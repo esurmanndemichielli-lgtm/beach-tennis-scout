@@ -28,7 +28,10 @@ function ProcessingContent() {
         if (!res.ok) throw new Error("err");
         const data = await res.json();
         setStatus(data);
-        if (data.status === "completed") { clearInterval(iv); setTimeout(() => router.push("/matches"), 2000); }
+        if (data.status === "completed") {
+          clearInterval(iv);
+          setTimeout(() => router.push("/results?job_id=" + jobId), 2000);
+        }
         if (data.status === "error") { clearInterval(iv); setError(data.error || "Erro."); }
       } catch { setError("Erro ao conectar."); clearInterval(iv); }
     }, 1000);
@@ -50,7 +53,7 @@ function ProcessingContent() {
             {done ? "Análise concluída!" : error ? "Erro" : "Analisando partida"}
           </h1>
           <p style={{ fontSize: 14, color: "var(--muted)" }}>
-            {done ? "Redirecionando..." : error || "A IA está processando o vídeo..."}
+            {done ? "Redirecionando para resultados..." : error || "A IA está processando o vídeo..."}
           </p>
         </div>
         {!error && (
