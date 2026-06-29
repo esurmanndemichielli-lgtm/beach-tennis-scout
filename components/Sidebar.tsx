@@ -7,6 +7,7 @@ const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: "⊞" },
   { href: "/matches", label: "Partidas", icon: "🎾" },
   { href: "/players", label: "Jogadores", icon: "👤" },
+  { href: "/results", label: "Resultados IA", icon: "🤖" },
   { href: "/upload", label: "Nova análise", icon: "＋" },
 ];
 
